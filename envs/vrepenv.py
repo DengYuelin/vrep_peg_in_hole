@@ -212,9 +212,6 @@ class ArmEnv(object):
     def sample_action(self):
         return np.random.rand(6) - 0.5
 
-    def PD_control(self):
-        return np.random.rand(6) - 0.5
-
 
 if __name__ == '__main__':
     env = ArmEnv()
