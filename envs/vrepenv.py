@@ -1,10 +1,10 @@
 import numpy as np
+import algorithms.calculations as cal
 from support_files import vrep
 import time
 
 
 class ArmEnv(object):
-    action_bound = [-1, 1]
     state_dim = 9  # number of variables that describe the robot
     action_dim = 6  # number of actions that could be taken
 
@@ -31,6 +31,8 @@ class ArmEnv(object):
         print("IRB140_connection", self.errorCode, self.force_sensor_handle)
         self.errorCode, self.forceState, self.forceVector, self.torqueVector = \
             vrep.simxReadForceSensor(self.clientID, self.force_sensor_handle, vrep.simx_opmode_streaming)
+        self.errorCode, self.position = \
+            vrep.simxGetObjectPosition(self.clientID, self.force_sensor_handle, -1, vrep.simx_opmode_streaming)
         print("init force sensor IRB140_connection", self.errorCode, self.forceState)
 
         # Get Joint data
@@ -76,28 +78,28 @@ class ArmEnv(object):
 
     def step(self, action):
         done = False  # round indicator
-        action = np.clip(action, *self.action_bound)  # get action form network
+
         # set FK or IK
         vrep.simxSetIntegerSignal(self.clientID, "movementMode", self.movementMode, vrep.simx_opmode_oneshot)
         # read force sensor
         self.errorCode, self.forceState, self.forceVector, self.torqueVector = \
             vrep.simxReadForceSensor(self.clientID, self.force_sensor_handle, vrep.simx_opmode_buffer)
+        self.errorCode, self.position = \
+            vrep.simxGetObjectPosition(self.clientID, self.force_sensor_handle, -1, vrep.simx_opmode_buffer)
 
         # calculations
-        #
-        #
-        #
-        #
+        # adjust action to usable motion
+        action = cal.actions(action, self.movementMode)
 
         # take actions
         if self.movementMode:  # in IK mode
             # do action
-            self.IK['Pos_x'] += action[0]*0.01
-            self.IK['Pos_y'] += action[1]*0.01
-            self.IK['Pos_z'] += action[2]*0.01
-            self.IK['Alpha'] += action[3]*0.01
-            self.IK['Beta'] += action[4]*0.01
-            self.IK['Gamma'] += action[5]*0.01
+            self.IK['Pos_x'] += action[0]
+            self.IK['Pos_y'] += action[1]
+            self.IK['Pos_z'] += action[2]
+            self.IK['Alpha'] += action[3]
+            self.IK['Beta'] += action[4]
+            self.IK['Gamma'] += action[5]
 
             # send signal
             vrep.simxSetFloatSignal(self.clientID, "pos_X", self.IK['Pos_x'], vrep.simx_opmode_oneshot)
@@ -145,22 +147,23 @@ class ArmEnv(object):
                                     vrep.simx_opmode_oneshot)
             time.sleep(0.1)  # wait for action to finish
 
-        # done and reward
-        r = 0
-        #
-        #
-        #
-        #
-
         # state
-        s = [1, 2, 3, 4, 5, 6, 7, 8, 9]
-        #
-        #
-        #
-        #
+        s = np.concatenate(self.position, self.forceVector, self.torqueVector)
+
+        # done and reward
+        r = cal.reword(self.s)
+
         return s, r, done
 
     def reset(self):
+
+        # read force sensor
+        self.errorCode, self.forceState, self.forceVector, self.torqueVector = \
+            vrep.simxReadForceSensor(self.clientID, self.force_sensor_handle, vrep.simx_opmode_buffer)
+        self.errorCode, self.position = \
+            vrep.simxGetObjectPosition(self.clientID, self.force_sensor_handle, -1, vrep.simx_opmode_buffer)
+
+        # reset position
         if self.movementMode:  # in IK mode
             self.IK['Pos_x'] = 0
             self.IK['Pos_y'] = 0
@@ -178,12 +181,12 @@ class ArmEnv(object):
             time.sleep(10)
             # wait for action to finish
         else:
-            self.FK['Joint1'] = 500
-            self.FK['Joint2'] = 500
-            self.FK['Joint3'] = 500
-            self.FK['Joint4'] = 500
-            self.FK['Joint5'] = 500
-            self.FK['Joint6'] = 500
+            self.FK['Joint1'] = 0
+            self.FK['Joint2'] = 0
+            self.FK['Joint3'] = 0
+            self.FK['Joint4'] = 0
+            self.FK['Joint5'] = -90
+            self.FK['Joint6'] = 0
             # send signal
             vrep.simxSetFloatSignal(self.clientID, "Joint1",
                                     (self.FK['Joint1'] * np.pi / 180 - self.Joints[0][0]) / self.Joints[0][1] * 1000,
@@ -206,10 +209,13 @@ class ArmEnv(object):
             time.sleep(10)
             # wait for action to finish
         # state
-        s = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+        s = np.concatenate(self.position, self.forceVector, self.torqueVector)
         return s
 
     def sample_action(self):
+        return np.random.rand(6) - 0.5
+
+    def sample_pd_control(self):
         return np.random.rand(6) - 0.5
 
 

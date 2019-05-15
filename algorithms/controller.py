@@ -47,10 +47,10 @@ class env_search_control(object):
         """The desired force and moments :: get the force"""
         """action = [0, 1, 2, 3, 4]"""
         self.desired_force_moment = np.array([[0, 0, -40, 0, 0, 0],
-                                             [0, 0, -40, 0, 0, 0],
-                                             [0, 0, -40, 0, 0, 0],
-                                             [0, 0, -40, 0, 0, 0],
-                                             [0, 0, -40, 0, 0, 0]])
+                                              [0, 0, -40, 0, 0, 0],
+                                              [0, 0, -40, 0, 0, 0],
+                                              [0, 0, -40, 0, 0, 0],
+                                              [0, 0, -40, 0, 0, 0]])
 
         """The force and moment"""
         self.max_force_moment = [50, 5]
@@ -179,7 +179,7 @@ class env_search_control(object):
 
         if state[2] < self.robot_control.final_pos[2]:
             print("+++++++++++++++++++++++++++++ The Search Phase Finished!!! ++++++++++++++++++++++++++++")
-            self.reward = 1 - step_num/self.step_max
+            self.reward = 1 - step_num / self.step_max
             done = True
 
         self.next_state = self.get_state()
@@ -206,7 +206,7 @@ class env_search_control(object):
 
         # normalize the state
         scale = self.high - self.low
-        final_state = (state - self.low)/scale
+        final_state = (state - self.low) / scale
         return final_state
 
     def positon_control(self):
