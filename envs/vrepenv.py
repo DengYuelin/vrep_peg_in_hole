@@ -215,11 +215,14 @@ class ArmEnv(object):
     def sample_action(self):
         return np.random.rand(6) - 0.5
 
-    def sample_pd_control(self):
+    def sample_pd_control(self, s):
         return np.random.rand(6) - 0.5
 
 
 if __name__ == '__main__':
     env = ArmEnv()
     while True:
-        env.step(env.sample_action())
+        s = env.reset()
+        for i in range(300):
+            a = env.sample_pd_control(s)
+            s, r, done = env.step(a)
