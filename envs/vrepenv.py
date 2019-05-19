@@ -7,6 +7,7 @@ import time
 class ArmEnv(object):
     state_dim = 9  # number of variables that describe the robot
     action_dim = 6  # number of actions that could be taken
+    action_bound = cal.action_bound  # boundary of the action out put of RL algorithms
 
     def __init__(self):
 
@@ -50,10 +51,11 @@ class ArmEnv(object):
                 # print(self.errorCode,'Interval_{}_{}'.format(i+1,j+1),self.Joints[i][j])
             self.Joint_boundary[i] = [(self.Joints[i][0] / np.pi * 180),
                                       ((self.Joints[i][0] / np.pi * 180) + (self.Joints[i][1] / np.pi * 180))]
-            print(self.Joint_boundary[i])
+            print("Joint boundary ", i, self.Joint_boundary[i])
 
-            # Setup controllable variables
+        # Setup controllable variables
         self.movementMode = 1  # work under FK(0) or IK(1)
+
         self.FK = np.zeros(1, dtype=[('Joint1', np.float32), ('Joint2', np.float32), ('Joint3', np.float32),
                                      ('Joint4', np.float32), ('Joint5', np.float32), ('Joint6', np.float32)])
         # initial angle in FK mode
@@ -148,10 +150,10 @@ class ArmEnv(object):
             time.sleep(0.1)  # wait for action to finish
 
         # state
-        s = np.concatenate(self.position, self.forceVector, self.torqueVector)
+        s = np.concatenate((self.position, self.forceVector, self.torqueVector))
 
         # done and reward
-        r = cal.reword(self.s)
+        r, done = cal.reword(s)
 
         return s, r, done
 
@@ -178,7 +180,7 @@ class ArmEnv(object):
             vrep.simxSetFloatSignal(self.clientID, "Alpha", self.IK['Alpha'], vrep.simx_opmode_oneshot)
             vrep.simxSetFloatSignal(self.clientID, "Beta", self.IK['Beta'], vrep.simx_opmode_oneshot)
             vrep.simxSetFloatSignal(self.clientID, "Gamma", self.IK['Gamma'], vrep.simx_opmode_oneshot)
-            time.sleep(10)
+            time.sleep(1)
             # wait for action to finish
         else:
             self.FK['Joint1'] = 0
@@ -206,23 +208,20 @@ class ArmEnv(object):
             vrep.simxSetFloatSignal(self.clientID, "Joint6",
                                     (self.FK['Joint6'] * np.pi / 180 - self.Joints[5][0]) / self.Joints[5][1] * 1000,
                                     vrep.simx_opmode_oneshot)
-            time.sleep(10)
+            time.sleep(1)
             # wait for action to finish
         # state
-        s = np.concatenate(self.position, self.forceVector, self.torqueVector)
+        s = np.concatenate((self.position, self.forceVector, self.torqueVector))
         return s
 
-    def sample_action(self):
+    @staticmethod
+    def sample_action():
         return np.random.rand(6) - 0.5
 
-    def sample_pd_control(self, s):
-        return np.random.rand(6) - 0.5
 
-
+# input random action to the robot
 if __name__ == '__main__':
     env = ArmEnv()
     while True:
-        s = env.reset()
-        for i in range(300):
-            a = env.sample_pd_control(s)
-            s, r, done = env.step(a)
+        a = env.sample_action() * 100
+        env.step(a)
