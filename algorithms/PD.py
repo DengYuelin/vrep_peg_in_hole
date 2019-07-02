@@ -22,4 +22,5 @@ class PD:
         self.ek_1 = self.ek
         self.uk_1 = self.uk
         action = np.append(self.uk, 0)
+        action[0] = -action[0]
         return action

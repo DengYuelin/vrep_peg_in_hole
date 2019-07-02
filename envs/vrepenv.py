@@ -26,6 +26,7 @@ class ArmEnv(object):
         else:
             exit('Failed connecting to remote API server')
         vrep.simxStartSimulation(self.clientID, vrep.simx_opmode_oneshot)
+
         vrep.simxSetIntegerSignal(self.clientID, "Apimode", 1, vrep.simx_opmode_oneshot)  # activate apimode
 
         # vrep sensor setup
@@ -38,7 +39,9 @@ class ArmEnv(object):
         self.errorCode, self.position = \
             vrep.simxGetObjectPosition(self.clientID, self.force_sensor_handle, -1, vrep.simx_opmode_streaming)
         print("init force sensor IRB140_connection", self.errorCode, self.forceState)
-
+        vrep.simxFinish(-1)
+        self.clientID = vrep.simxStart('127.0.0.1', 19997, True, True, 5000, 5)
+        vrep.simxStartSimulation(self.clientID, vrep.simx_opmode_oneshot)
         # Get Joint data
         self.Joints = np.zeros((6, 2))
         self.Joint_boundary = np.zeros((6, 2))
@@ -75,10 +78,11 @@ class ArmEnv(object):
         self.IK['Pos_x'] = 0
         self.IK['Pos_y'] = 0
         self.IK['Pos_z'] = 0
-        self.IK['Alpha'] = 0
-        self.IK['Beta'] = 0
-        self.IK['Gamma'] = 0
+        self.IK['Alpha'] = 0  # x
+        self.IK['Beta'] = 0  # y
+        self.IK['Gamma'] = 0  # z
 
+        self.reset()
         # Auxiliary variables
 
     def step(self, action):
@@ -101,7 +105,8 @@ class ArmEnv(object):
             # do action
             self.IK['Pos_x'] += action[0]
             self.IK['Pos_y'] += action[1]
-            self.IK['Pos_z'] += action[2]
+            # self.IK['Pos_z'] += action[2]
+            self.IK['Pos_z'] += -0.0001
             self.IK['Alpha'] += action[3]
             self.IK['Beta'] += action[4]
             self.IK['Gamma'] += action[5]
@@ -176,7 +181,15 @@ class ArmEnv(object):
         vrep.c_Synchronous(self.clientID, True)
         self.clientID = vrep.simxStart('127.0.0.1', 19997, True, True, 5000, 5)  # restart communication to the server
         vrep.simxStartSimulation(self.clientID, vrep.simx_opmode_oneshot)  # start simulation
+        # Setup the force sensor
+        self.errorCode, self.force_sensor_handle = vrep.simxGetObjectHandle(self.clientID, 'IRB140_connection',
+                                                                            vrep.simx_opmode_blocking)
+        self.errorCode, self.forceState, self.forceVector, self.torqueVector = \
+            vrep.simxReadForceSensor(self.clientID, self.force_sensor_handle, vrep.simx_opmode_streaming)
+        self.errorCode, self.position = \
+            vrep.simxGetObjectPosition(self.clientID, self.force_sensor_handle, -1, vrep.simx_opmode_streaming)
         print("scene rested")
+        vrep.simxSetIntegerSignal(self.clientID, "Apimode", 1, vrep.simx_opmode_oneshot)
 
         # reset signals
         if self.movementMode:  # in IK mode
@@ -233,7 +246,7 @@ if __name__ == '__main__':
     env = ArmEnv()
     while True:
         for i in range(30):
-            a = env.sample_action() * 1000
-            env.step(a)
+            a = env.sample_action() * 100
+            s, r, done = env.step(a)
         env.reset()
 

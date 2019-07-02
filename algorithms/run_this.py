@@ -1,9 +1,10 @@
 from envs.vrepenv import ArmEnv
 from algorithms.PD import PD
 import numpy as np
+import time
 
 MAX_EPISODES = 900
-MAX_EP_STEPS = 200
+MAX_EP_STEPS = 1000
 ON_TRAIN = True
 
 # set env
@@ -26,9 +27,9 @@ def train():
         for j in range(MAX_EP_STEPS):
 
             a = rl.cal(s, np.array([0, 0, -40, 0, 0]))
-
             s, r, done = env.step(a)
-
+            #time.sleep(1)
+            print("force", s[3:6], "action", a[0:3])
             if done or j == MAX_EP_STEPS - 1:
                 print('Ep: %i | %s | ep_r: %.1f | step: %i' % (i, '---' if not done else 'done', ep_r, j))
                 break
