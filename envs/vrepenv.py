@@ -15,14 +15,17 @@ class ArmEnv(object):
         print('Program started')
         vrep.simxFinish(-1)  # just in case, close all opened connections
         # Connect to V-REP, get clientID
-        self.clientID = vrep.simxStart('127.0.0.1', 10001, True, True, 5000, 5)  # enter scene ID here
+        self.clientID = vrep.simxStart('127.0.0.1', 19997, True, True, 5000, 5)  # enter server here
+        # the server ID should be consistent with the ID listed in remoteApiConnections.txt, which can be found under
+        # the V-REP installation folder
+        vrep.c_Synchronous(self.clientID, True)
 
         if self.clientID != -1:  # confirm connection
             print('Connected to remote API server')
 
         else:
             exit('Failed connecting to remote API server')
-
+        vrep.simxStartSimulation(self.clientID, vrep.simx_opmode_oneshot)
         vrep.simxSetIntegerSignal(self.clientID, "Apimode", 1, vrep.simx_opmode_oneshot)  # activate apimode
 
         # vrep sensor setup
@@ -165,7 +168,17 @@ class ArmEnv(object):
         self.errorCode, self.position = \
             vrep.simxGetObjectPosition(self.clientID, self.force_sensor_handle, -1, vrep.simx_opmode_buffer)
 
-        # reset position
+        # reset position signal
+        # should be a scene reset command
+        vrep.simxStopSimulation(self.clientID, vrep.simx_opmode_oneshot)
+        time.sleep(1)  # must wait until stop command is finished
+        vrep.simxFinish(-1)  # end all communications
+        vrep.c_Synchronous(self.clientID, True)
+        self.clientID = vrep.simxStart('127.0.0.1', 19997, True, True, 5000, 5)  # restart communication to the server
+        vrep.simxStartSimulation(self.clientID, vrep.simx_opmode_oneshot)  # start simulation
+        print("scene rested")
+
+        # reset signals
         if self.movementMode:  # in IK mode
             self.IK['Pos_x'] = 0
             self.IK['Pos_y'] = 0
@@ -180,8 +193,6 @@ class ArmEnv(object):
             vrep.simxSetFloatSignal(self.clientID, "Alpha", self.IK['Alpha'], vrep.simx_opmode_oneshot)
             vrep.simxSetFloatSignal(self.clientID, "Beta", self.IK['Beta'], vrep.simx_opmode_oneshot)
             vrep.simxSetFloatSignal(self.clientID, "Gamma", self.IK['Gamma'], vrep.simx_opmode_oneshot)
-            time.sleep(1)
-            # wait for action to finish
         else:
             self.FK['Joint1'] = 0
             self.FK['Joint2'] = 0
@@ -208,8 +219,6 @@ class ArmEnv(object):
             vrep.simxSetFloatSignal(self.clientID, "Joint6",
                                     (self.FK['Joint6'] * np.pi / 180 - self.Joints[5][0]) / self.Joints[5][1] * 1000,
                                     vrep.simx_opmode_oneshot)
-            time.sleep(1)
-            # wait for action to finish
         # state
         s = np.concatenate((self.position, self.forceVector, self.torqueVector))
         return s
@@ -223,5 +232,8 @@ class ArmEnv(object):
 if __name__ == '__main__':
     env = ArmEnv()
     while True:
-        a = env.sample_action() * 100
-        env.step(a)
+        for i in range(30):
+            a = env.sample_action() * 1000
+            env.step(a)
+        env.reset()
+
