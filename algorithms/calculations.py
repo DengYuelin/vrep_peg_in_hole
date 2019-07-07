@@ -19,3 +19,13 @@ def actions(a, mode):  # here a ∈ action_bound
         a_a = a * 0.01
     return a_a
 
+
+# this function checks if the force and torque extends safety value
+def safetycheck(s):
+    if s[3] >= 100 or s[4]>= 100 or s[5] >= 100:
+        return False
+    elif s[6] >= 100 or s[7]>= 100 or s[8] >= 100:
+        return False
+    else:
+        return True
+

@@ -163,7 +163,10 @@ class ArmEnv(object):
         # done and reward
         r, done = cal.reword(s)
 
-        return s, r, done
+        # safety check
+        safe = cal.safetycheck(s)
+
+        return s, r, done, safe
 
     def reset(self):
 
@@ -247,6 +250,6 @@ if __name__ == '__main__':
     while True:
         for i in range(30):
             a = env.sample_action() * 100
-            s, r, done = env.step(a)
+            s, r, done, safe = env.step(a)
         env.reset()
 
