@@ -86,8 +86,6 @@ class ArmEnv(object):
         # Auxiliary variables
 
     def step(self, action):
-        done = False  # round indicator
-
         # set FK or IK
         vrep.simxSetIntegerSignal(self.clientID, "movementMode", self.movementMode, vrep.simx_opmode_oneshot)
         # read force sensor
