@@ -39,6 +39,21 @@ class ArmEnv(object):
         self.errorCode, self.position = \
             vrep.simxGetObjectPosition(self.clientID, self.force_sensor_handle, -1, vrep.simx_opmode_streaming)
         print("init force sensor IRB140_connection", self.errorCode, self.forceState)
+
+        # Get hole position info
+        self.errorCode, self.hole_handle = vrep.simxGetObjectHandle(self.clientID, 'Hole', vrep.simx_opmode_blocking)
+        self.errorCode, self.init_position = vrep.simxGetObjectPosition(self.clientID, self.hole_handle, -1,
+                                                                        vrep.simx_opmode_streaming)
+        while self.errorCode:
+            self.errorCode, self.init_position = vrep.simxGetObjectPosition(self.clientID, self.hole_handle, -1,
+                                                                            vrep.simx_opmode_buffer)
+        self.errorCode, self.init_orientation = vrep.simxGetObjectOrientation(self.clientID, self.hole_handle, -1,
+                                                                              vrep.simx_opmode_streaming)
+        while self.errorCode:
+            self.errorCode, self.init_orientation = vrep.simxGetObjectOrientation(self.clientID, self.hole_handle, -1,
+                                                                                  vrep.simx_opmode_buffer)
+        print("init position of hole", self.init_position, self.init_orientation)
+
         vrep.simxFinish(-1)
         self.clientID = vrep.simxStart('127.0.0.1', 19997, True, True, 5000, 5)
         vrep.simxStartSimulation(self.clientID, vrep.simx_opmode_oneshot)
@@ -174,8 +189,7 @@ class ArmEnv(object):
         self.errorCode, self.position = \
             vrep.simxGetObjectPosition(self.clientID, self.force_sensor_handle, -1, vrep.simx_opmode_buffer)
 
-        # reset position signal
-        # should be a scene reset command
+        # restart scene
         vrep.simxStopSimulation(self.clientID, vrep.simx_opmode_oneshot)
         time.sleep(1)  # must wait until stop command is finished
         vrep.simxFinish(-1)  # end all communications
@@ -191,6 +205,20 @@ class ArmEnv(object):
             vrep.simxGetObjectPosition(self.clientID, self.force_sensor_handle, -1, vrep.simx_opmode_streaming)
         print("scene rested")
         vrep.simxSetIntegerSignal(self.clientID, "Apimode", 1, vrep.simx_opmode_oneshot)
+
+        # set random hole position
+        new_position = self.init_position.copy()
+        new_orientation = self.init_orientation.copy()
+        print(self.init_position, self.init_orientation)
+        new_position[0] += (np.random.rand(1) - 0.5) * 0.002
+        new_position[1] += (np.random.rand(1) - 0.5) * 0.002
+        new_position[0] += 0
+        new_orientation[0] += (np.random.rand(1) - 0.5) * 0.04
+        new_orientation[1] += (np.random.rand(1) - 0.5) * 0.04
+        new_orientation[2] += (np.random.rand(1) - 0.5) * 0.04
+        print(new_position, new_orientation)
+        vrep.simxSetObjectPosition(self.clientID, self.hole_handle, -1, new_position, vrep.simx_opmode_oneshot)
+        vrep.simxSetObjectOrientation(self.clientID, self.hole_handle, -1, new_orientation, vrep.simx_opmode_oneshot)
 
         # reset signals
         if self.movementMode:  # in IK mode
@@ -250,4 +278,3 @@ if __name__ == '__main__':
             a = env.sample_action() * 100
             s, r, done, safe = env.step(a)
         env.reset()
-

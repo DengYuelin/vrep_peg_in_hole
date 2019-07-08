@@ -1,7 +1,7 @@
 import numpy as np
 
 
-# boundary for action
+# boundary for action out put
 action_bound = [-20, 20]
 
 
