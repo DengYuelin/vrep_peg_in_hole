@@ -118,8 +118,8 @@ class ArmEnv(object):
             # do action
             self.IK['Pos_x'] += action[0]
             self.IK['Pos_y'] += action[1]
-            # self.IK['Pos_z'] += action[2]
-            self.IK['Pos_z'] += -0.0001
+            self.IK['Pos_z'] += action[2]
+            # self.IK['Pos_z'] += -0.0001
             self.IK['Alpha'] += action[3]
             self.IK['Beta'] += action[4]
             self.IK['Gamma'] += action[5]
@@ -209,14 +209,12 @@ class ArmEnv(object):
         # set random hole position
         new_position = self.init_position.copy()
         new_orientation = self.init_orientation.copy()
-        print(self.init_position, self.init_orientation)
         new_position[0] += (np.random.rand(1) - 0.5) * 0.002
         new_position[1] += (np.random.rand(1) - 0.5) * 0.002
         new_position[0] += 0
         new_orientation[0] += (np.random.rand(1) - 0.5) * 0.04
         new_orientation[1] += (np.random.rand(1) - 0.5) * 0.04
         new_orientation[2] += (np.random.rand(1) - 0.5) * 0.04
-        print(new_position, new_orientation)
         vrep.simxSetObjectPosition(self.clientID, self.hole_handle, -1, new_position, vrep.simx_opmode_oneshot)
         vrep.simxSetObjectOrientation(self.clientID, self.hole_handle, -1, new_orientation, vrep.simx_opmode_oneshot)
 
@@ -262,6 +260,13 @@ class ArmEnv(object):
                                     (self.FK['Joint6'] * np.pi / 180 - self.Joints[5][0]) / self.Joints[5][1] * 1000,
                                     vrep.simx_opmode_oneshot)
         # state
+        # wait for the environment to stabilize
+        time.sleep(1)
+        # read force sensor
+        self.errorCode, self.forceState, self.forceVector, self.torqueVector = \
+            vrep.simxReadForceSensor(self.clientID, self.force_sensor_handle, vrep.simx_opmode_buffer)
+        self.errorCode, self.position = \
+            vrep.simxGetObjectPosition(self.clientID, self.force_sensor_handle, -1, vrep.simx_opmode_buffer)
         s = np.concatenate((self.position, self.forceVector, self.torqueVector))
         return s
 
