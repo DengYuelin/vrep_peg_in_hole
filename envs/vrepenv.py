@@ -33,12 +33,18 @@ class ArmEnv(object):
         # Setup the force sensor
         self.errorCode, self.force_sensor_handle = vrep.simxGetObjectHandle(self.clientID, 'IRB140_connection',
                                                                             vrep.simx_opmode_blocking)
+        self.errorCode, self.target_handle = vrep.simxGetObjectHandle(self.clientID, 'Target',
+                                                                            vrep.simx_opmode_blocking)
         print("IRB140_connection", self.errorCode, self.force_sensor_handle)
+        print("Target", self.errorCode, self.target_handle)
         self.errorCode, self.forceState, self.forceVector, self.torqueVector = \
             vrep.simxReadForceSensor(self.clientID, self.force_sensor_handle, vrep.simx_opmode_streaming)
         self.errorCode, self.position = \
-            vrep.simxGetObjectPosition(self.clientID, self.force_sensor_handle, -1, vrep.simx_opmode_streaming)
-        print("init force sensor IRB140_connection", self.errorCode, self.forceState)
+            vrep.simxGetObjectPosition(self.clientID, self.force_sensor_handle, self.target_handle, vrep.simx_opmode_streaming)
+        while self.errorCode:
+            self.errorCode, self.position = vrep.simxGetObjectPosition(self.clientID, self.force_sensor_handle, self.target_handle,
+                                                                            vrep.simx_opmode_buffer)
+        print("init force sensor IRB140_connection", self.position, self.forceState)
 
         # Get hole position info
         self.errorCode, self.hole_handle = vrep.simxGetObjectHandle(self.clientID, 'Hole', vrep.simx_opmode_blocking)
@@ -47,6 +53,7 @@ class ArmEnv(object):
         while self.errorCode:
             self.errorCode, self.init_position = vrep.simxGetObjectPosition(self.clientID, self.hole_handle, -1,
                                                                             vrep.simx_opmode_buffer)
+
         self.errorCode, self.init_orientation = vrep.simxGetObjectOrientation(self.clientID, self.hole_handle, -1,
                                                                               vrep.simx_opmode_streaming)
         while self.errorCode:
@@ -107,7 +114,7 @@ class ArmEnv(object):
         self.errorCode, self.forceState, self.forceVector, self.torqueVector = \
             vrep.simxReadForceSensor(self.clientID, self.force_sensor_handle, vrep.simx_opmode_buffer)
         self.errorCode, self.position = \
-            vrep.simxGetObjectPosition(self.clientID, self.force_sensor_handle, -1, vrep.simx_opmode_buffer)
+            vrep.simxGetObjectPosition(self.clientID, self.force_sensor_handle, self.target_handle, vrep.simx_opmode_buffer)
 
         # calculations
         # adjust action to usable motion
@@ -170,6 +177,7 @@ class ArmEnv(object):
                                     vrep.simx_opmode_oneshot)
             time.sleep(0.1)  # wait for action to finish
 
+        print(self.position)
         # state
         s = np.concatenate((self.position, self.forceVector, self.torqueVector))
 
@@ -187,7 +195,7 @@ class ArmEnv(object):
         self.errorCode, self.forceState, self.forceVector, self.torqueVector = \
             vrep.simxReadForceSensor(self.clientID, self.force_sensor_handle, vrep.simx_opmode_buffer)
         self.errorCode, self.position = \
-            vrep.simxGetObjectPosition(self.clientID, self.force_sensor_handle, -1, vrep.simx_opmode_buffer)
+            vrep.simxGetObjectPosition(self.clientID, self.force_sensor_handle, self.target_handle, vrep.simx_opmode_buffer)
 
         # restart scene
         vrep.simxStopSimulation(self.clientID, vrep.simx_opmode_oneshot)
@@ -202,7 +210,7 @@ class ArmEnv(object):
         self.errorCode, self.forceState, self.forceVector, self.torqueVector = \
             vrep.simxReadForceSensor(self.clientID, self.force_sensor_handle, vrep.simx_opmode_streaming)
         self.errorCode, self.position = \
-            vrep.simxGetObjectPosition(self.clientID, self.force_sensor_handle, -1, vrep.simx_opmode_streaming)
+            vrep.simxGetObjectPosition(self.clientID, self.force_sensor_handle, self.target_handle, vrep.simx_opmode_streaming)
         print("scene rested")
         vrep.simxSetIntegerSignal(self.clientID, "Apimode", 1, vrep.simx_opmode_oneshot)
 
@@ -266,7 +274,7 @@ class ArmEnv(object):
         self.errorCode, self.forceState, self.forceVector, self.torqueVector = \
             vrep.simxReadForceSensor(self.clientID, self.force_sensor_handle, vrep.simx_opmode_buffer)
         self.errorCode, self.position = \
-            vrep.simxGetObjectPosition(self.clientID, self.force_sensor_handle, -1, vrep.simx_opmode_buffer)
+            vrep.simxGetObjectPosition(self.clientID, self.force_sensor_handle, self.target_handle, vrep.simx_opmode_buffer)
         s = np.concatenate((self.position, self.forceVector, self.torqueVector))
         return s
 
