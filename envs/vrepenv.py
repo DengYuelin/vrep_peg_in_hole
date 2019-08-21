@@ -175,7 +175,7 @@ class ArmEnv(object):
             vrep.simxSetFloatSignal(self.clientID, "Joint6",
                                     (self.FK['Joint6'] * np.pi / 180 - self.Joints[5][0]) / self.Joints[5][1] * 1000,
                                     vrep.simx_opmode_oneshot)
-            time.sleep(0.1)  # wait for action to finish
+            # time.sleep(0.01)  # wait for action to finish
 
         # print(self.position)
         # state
@@ -269,7 +269,7 @@ class ArmEnv(object):
                                     vrep.simx_opmode_oneshot)
         # state
         # wait for the environment to stabilize
-        time.sleep(1)
+        time.sleep(0.5)
         # read force sensor
         self.errorCode, self.forceState, self.forceVector, self.torqueVector = \
             vrep.simxReadForceSensor(self.clientID, self.force_sensor_handle, vrep.simx_opmode_buffer)

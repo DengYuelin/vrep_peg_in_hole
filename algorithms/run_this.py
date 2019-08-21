@@ -5,7 +5,7 @@ import numpy as np
 import time
 
 MAX_EPISODES = 900
-MAX_EP_STEPS = 500
+MAX_EP_STEPS = 200
 ON_TRAIN = True
 
 # set env
@@ -27,7 +27,7 @@ def runpd():
         ep_r = 0.
         for j in range(MAX_EP_STEPS):
 
-            a = pd.cal(s, np.array([0, 0, -3, 0, 0]))
+            a = pd.cal(s, np.array([0, 0, -4, 0, 0]))
             s, r, done, safe = env.step(a)
             if done or j == MAX_EP_STEPS - 1 or safe is False:
                 print('Ep: %i | %s | %s | ep_r: %.1f | step: %i' % (i, '---' if not done else 'done', 'unsafe' if not safe else 'safe', ep_r, j))
@@ -42,6 +42,7 @@ def train():
         for j in range(MAX_EP_STEPS):
 
             a = rl.choose_action(s)
+            print(a)
             s_, r, done, safe = env.step(a)
 
             rl.store_transition(s, a, r, s_)
@@ -70,4 +71,4 @@ def eval():
 if ON_TRAIN:
     train()
 else:
-    eval()
+    runpd()
