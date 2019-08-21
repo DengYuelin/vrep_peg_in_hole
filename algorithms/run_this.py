@@ -68,6 +68,6 @@ def eval():
 
 
 if ON_TRAIN:
-    runpd()
+    train()
 else:
     eval()

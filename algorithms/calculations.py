@@ -6,8 +6,11 @@ action_bound = [-20, 20]
 
 
 def reword(s):
-    r = 0
-    done = 0
+    r = -(s[0] + s[1] + s[2])
+    if abs(s[0]) < 0.001 and abs(s[1]) < 0.001 and abs(s[2]) < 0.001:
+        done = 1
+    else:
+        done = 0
     return r, done
 
 
