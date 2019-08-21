@@ -177,7 +177,7 @@ class ArmEnv(object):
                                     vrep.simx_opmode_oneshot)
             time.sleep(0.1)  # wait for action to finish
 
-        print(self.position)
+        # print(self.position)
         # state
         s = np.concatenate((self.position, self.forceVector, self.torqueVector))
 
