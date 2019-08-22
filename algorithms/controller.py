@@ -1,13 +1,5 @@
 # -*- coding: utf-8 -*-
 """
-# @Time    : 12/05/19 10:54 AM
-# @Author  : ZHIMIN HOU
-# @FileName: controller.py
-# @Software: PyCharm
-# @Github    ： https://github.com/hzm2016
-"""
-# -*- coding: utf-8 -*-
-"""
 -------------------------------------------------
    File Name：     Env_robot_control
    Description :  The class for real-world experiments to control the ABB robot,
