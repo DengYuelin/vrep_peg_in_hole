@@ -23,4 +23,6 @@ class PD:
         self.uk_1 = self.uk
         action = np.append(self.uk, 0)
         action[0] = - action[0]
+        action[3] = action[3] * 10
+        action[4] = action[4] * 10
         return action
