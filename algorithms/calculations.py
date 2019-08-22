@@ -9,9 +9,9 @@ action_bound = [-20, 20]
 def reword(s):
     r = -(abs(s[0]) + abs(s[1]) + abs(s[2]))*10 - (abs(s[3]) + abs(s[4]) + abs(s[5] + 1.5))
     if abs(s[0]) < 0.001 and abs(s[1]) < 0.001 and abs(s[2]) < 0.001:
-        done = 1
+        done = True
     else:
-        done = 0
+        done = False
     return r, done
 
 

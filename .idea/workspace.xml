@@ -2,11 +2,11 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="f4f42cc9-71a6-41e8-a033-66dc7191cef2" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/algorithms/plot_results.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vrep_peg_in_hole.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vrep_peg_in_hole.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/algorithms/PD.py" beforeDir="false" afterPath="$PROJECT_DIR$/algorithms/PD.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/algorithms/calculations.py" beforeDir="false" afterPath="$PROJECT_DIR$/algorithms/calculations.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/algorithms/run_this.py" beforeDir="false" afterPath="$PROJECT_DIR$/algorithms/run_this.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/envs/vrepenv.py" beforeDir="false" afterPath="$PROJECT_DIR$/envs/vrepenv.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scenes/Scene_Single_Peg.ttt" beforeDir="false" afterPath="$PROJECT_DIR$/scenes/Scene_Single_Peg.ttt" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -128,7 +128,7 @@
             <entry file="file://$PROJECT_DIR$/algorithms/calculations.py">
               <provider selected="true" editor-type-id="text-editor">
                 <state relative-caret-position="85">
-                  <caret line="5" column="24" lean-forward="true" selection-start-line="5" selection-start-column="24" selection-end-line="5" selection-end-column="24" />
+                  <caret line="5" column="24" selection-start-line="5" selection-start-column="24" selection-end-line="5" selection-end-column="24" />
                 </state>
               </provider>
             </entry>
@@ -369,7 +369,7 @@
     <entry file="file://$PROJECT_DIR$/algorithms/calculations.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="85">
-          <caret line="5" column="24" lean-forward="true" selection-start-line="5" selection-start-column="24" selection-end-line="5" selection-end-column="24" />
+          <caret line="5" column="24" selection-start-line="5" selection-start-column="24" selection-end-line="5" selection-end-column="24" />
         </state>
       </provider>
     </entry>

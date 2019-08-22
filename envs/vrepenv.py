@@ -128,9 +128,8 @@ class ArmEnv(object):
             self.IK['Pos_x'] += action[0]
             self.IK['Pos_y'] += action[1]
             self.IK['Pos_z'] += action[2]
-            # self.IK['Pos_z'] += -0.0001
-            self.IK['Alpha'] += action[3]
-            self.IK['Beta'] += action[4]
+            self.IK['Alpha'] += action[4]
+            self.IK['Beta'] += action[3]
             self.IK['Gamma'] += action[5]
 
             # send signal
