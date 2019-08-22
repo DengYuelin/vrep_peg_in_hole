@@ -5,6 +5,7 @@ import time
 
 
 class ArmEnv(object):
+
     state_dim = 9  # number of variables that describe the robot
     action_dim = 6  # number of actions that could be taken
     action_bound = cal.action_bound  # boundary of the action out put of RL algorithms
@@ -25,6 +26,7 @@ class ArmEnv(object):
 
         else:
             exit('Failed connecting to remote API server')
+
         vrep.simxStartSimulation(self.clientID, vrep.simx_opmode_oneshot)
 
         vrep.simxSetIntegerSignal(self.clientID, "Apimode", 1, vrep.simx_opmode_oneshot)  # activate apimode
