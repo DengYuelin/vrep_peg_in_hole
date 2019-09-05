@@ -2,17 +2,46 @@ import numpy as np
 import algorithms.calculations as cal
 from support_files import vrep
 import time
+from gym import spaces
 
 
 class ArmEnv(object):
 
     state_dim = 9  # number of variables that describe the robot
     action_dim = 6  # number of actions that could be taken
+
+    action_high_bound = 1
     action_bound = cal.action_bound  # boundary of the action out put of RL algorithms
+    action_space = spaces.Box(low=-1, high=1, shape=(action_dim,), dtype=np.float32)
+    observation_space = spaces.Box(low=-1, high=1, shape=(state_dim,), dtype=np.float32)
 
-    def __init__(self):
+    def __init__(self, step_max=100, fuzzy=False, add_noise=False):
 
-        # vrep init session
+        self.observation_dim = 9
+        self.action_dim = 6
+
+        """ state """
+        self.state = np.zeros(self.observation_dim)
+        self.next_state = np.zeros(self.observation_dim)
+        self.init_state = np.zeros(self.observation_dim)
+
+        """ action """
+        self.action = np.zeros(self.action_dim)
+        self.action_low_bound = np.array([-1, -1, -1, -1, -1, -1])
+        self.action_high_bound = np.array([1, 1, 1, 1, 1, 1])
+        self.fuzzy_control = fuzzy
+
+        """ reward """
+        self.step_max = step_max
+        self.step_max_pos = 15
+        self.reward = 1.
+
+        """setting"""
+        self.add_noise = add_noise  # or True
+        self.pull_terminal = False
+
+        
+        '''vrep init session''' 
         print('Program started')
         vrep.simxFinish(-1)  # just in case, close all opened connections
         # Connect to V-REP, get clientID
@@ -192,6 +221,7 @@ class ArmEnv(object):
 
     def reset(self):
 
+        '''Need to try if this can be removed'''
         # read force sensor
         self.errorCode, self.forceState, self.forceVector, self.torqueVector = \
             vrep.simxReadForceSensor(self.clientID, self.force_sensor_handle, vrep.simx_opmode_buffer)
@@ -277,7 +307,8 @@ class ArmEnv(object):
         self.errorCode, self.position = \
             vrep.simxGetObjectPosition(self.clientID, self.force_sensor_handle, self.target_handle, vrep.simx_opmode_buffer)
         s = np.concatenate((self.position, self.forceVector, self.torqueVector))
-        return s
+        done = False
+        return s, s, done
 
     @staticmethod
     def sample_action():
