@@ -126,5 +126,3 @@ def plot_comparision_curve_with_variance(result_paths, file_name='', render=Fals
 
 
 if __name__ == "__main__":
-
-
