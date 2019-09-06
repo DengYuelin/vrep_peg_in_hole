@@ -7,14 +7,6 @@ from gym import spaces
 
 class ArmEnv(object):
 
-    state_dim = 9  # number of variables that describe the robot
-    action_dim = 6  # number of actions that could be taken
-
-    action_high_bound = 1
-    action_bound = cal.action_bound  # boundary of the action out put of RL algorithms
-    action_space = spaces.Box(low=-1, high=1, shape=(action_dim,), dtype=np.float32)
-    observation_space = spaces.Box(low=-1, high=1, shape=(state_dim,), dtype=np.float32)
-
     def __init__(self, step_max=100, fuzzy=False, add_noise=False):
 
         self.observation_dim = 9
@@ -22,7 +14,6 @@ class ArmEnv(object):
 
         """ state """
         self.state = np.zeros(self.observation_dim)
-        self.next_state = np.zeros(self.observation_dim)
         self.init_state = np.zeros(self.observation_dim)
 
         """ action """
@@ -39,6 +30,19 @@ class ArmEnv(object):
         """setting"""
         self.add_noise = add_noise  # or True
         self.pull_terminal = False
+
+        """information for action and state"""
+        self.state_high = np.array([50, 50, 0, 5, 5, 6, 1453, 70, 995, 5, 5, 6])
+        self.state_low = np.array([-50, -50, -50, -5, -5, -6, 1456, 76, 985, -5, -5, -6])
+        self.terminated_state = np.array([30, 30, 30, 2, 2, 2])
+        self.action_space = spaces.Box(low=self.action_low_bound, high=self.action_high_bound,
+                                       shape=(self.action_dim,), dtype=np.float32)
+        self.observation_space = spaces.Box(low=self.state_low, high=self.state_high,
+                                            shape=(self.observation_dim,), dtype=np.float32)
+
+        """fuzzy parameters"""
+        self.fc = fuzzy_control(low_output=np.array([0., 0., 0., 0., 0., 0.]),
+                                high_output=np.array([0.03, 0.03, 0.004, 0.03, 0.03, 0.03]))
 
         
         '''vrep init session''' 
@@ -209,15 +213,15 @@ class ArmEnv(object):
 
         # print(self.position)
         # state
-        s = np.concatenate((self.position, self.forceVector, self.torqueVector))
+        self.state = np.concatenate((self.position, self.forceVector, self.torqueVector))
 
         # done and reward
-        r, done = cal.reword(s)
+        r, done = cal.reword(self.state)
 
         # safety check
-        safe = cal.safetycheck(s)
+        safe = cal.safetycheck(self.state)
 
-        return s, r, done, safe
+        return self.code_state(self.state), self.state, r, done, safe
 
     def reset(self):
 
@@ -242,7 +246,7 @@ class ArmEnv(object):
             vrep.simxReadForceSensor(self.clientID, self.force_sensor_handle, vrep.simx_opmode_streaming)
         self.errorCode, self.position = \
             vrep.simxGetObjectPosition(self.clientID, self.force_sensor_handle, self.target_handle, vrep.simx_opmode_streaming)
-        print("scene rested")
+        print("***********************scene rested***********************")
         vrep.simxSetIntegerSignal(self.clientID, "Apimode", 1, vrep.simx_opmode_oneshot)
 
         # set random hole position
@@ -306,13 +310,24 @@ class ArmEnv(object):
             vrep.simxReadForceSensor(self.clientID, self.force_sensor_handle, vrep.simx_opmode_buffer)
         self.errorCode, self.position = \
             vrep.simxGetObjectPosition(self.clientID, self.force_sensor_handle, self.target_handle, vrep.simx_opmode_buffer)
-        s = np.concatenate((self.position, self.forceVector, self.torqueVector))
+        self.init_state = np.concatenate((self.position, self.forceVector, self.torqueVector))
+        print('initial state :::::', self.init_state)
         done = False
-        return s, s, done
+        return self.code_state(self.init_state), self.init_state, done
 
     @staticmethod
     def sample_action():
         return np.random.rand(6) - 0.5
+
+    """ normalize state """
+    def code_state(self, current_state):
+        state = cp.deepcopy(current_state)
+
+        """normalize the state"""
+        scale = self.state_high - self.state_low
+        final_state = (state - self.state_low) / scale
+
+        return final_state
 
 
 # input random action to the robot
