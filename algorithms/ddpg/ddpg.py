@@ -121,14 +121,14 @@ def learn(network,
                 """ choose next action """
                 action, q, _, _ = agent.step(obs, stddev, apply_noise=True, compute_Q=True)
 
-                new_obs, next_state, r, done, safe_or_not, final_action = env.step(max_action * action, t_rollout)
+                new_obs, next_state, r, done, safe_or_not = env.step(max_action * action)
 
                 if safe_or_not is False:
                     break
 
                 episode_reward += r
                 episode_step += 1
-                episode_states.append([cp.deepcopy(state), cp.deepcopy(final_action), np.array(cp.deepcopy(r)), cp.deepcopy(next_state)])
+                episode_states.append([cp.deepcopy(state), cp.deepcopy(action), np.array(cp.deepcopy(r)), cp.deepcopy(next_state)])
 
                 epoch_actions.append(action)
                 epoch_qs.append(q)

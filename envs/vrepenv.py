@@ -2,6 +2,7 @@ import numpy as np
 import algorithms.calculations as cal
 from support_files import vrep
 import time
+import copy as cp
 from gym import spaces
 
 
@@ -17,9 +18,8 @@ class ArmEnv(object):
         self.init_state = np.zeros(self.observation_dim)
 
         """ action """
+        self.action_high_bound = 1
         self.action = np.zeros(self.action_dim)
-        self.action_low_bound = np.array([-1, -1, -1, -1, -1, -1])
-        self.action_high_bound = np.array([1, 1, 1, 1, 1, 1])
         self.fuzzy_control = fuzzy
 
         """ reward """
@@ -31,18 +31,23 @@ class ArmEnv(object):
         self.add_noise = add_noise  # or True
         self.pull_terminal = False
 
-        """information for action and state"""
+        '''Wrong'''
         self.state_high = np.array([50, 50, 0, 5, 5, 6, 1453, 70, 995, 5, 5, 6])
         self.state_low = np.array([-50, -50, -50, -5, -5, -6, 1456, 76, 985, -5, -5, -6])
         self.terminated_state = np.array([30, 30, 30, 2, 2, 2])
-        self.action_space = spaces.Box(low=self.action_low_bound, high=self.action_high_bound,
-                                       shape=(self.action_dim,), dtype=np.float32)
         self.observation_space = spaces.Box(low=self.state_low, high=self.state_high,
+                                            shape=(self.observation_dim,), dtype=np.float32)
+        
+        """information for action and state"""
+        self.terminated_state = np.array([30, 30, 30, 2, 2, 2])
+        self.action_space = spaces.Box(low=-1, high=1,
+                                       shape=(self.action_dim,), dtype=np.float32)
+        self.observation_space = spaces.Box(low=-10, high=10,
                                             shape=(self.observation_dim,), dtype=np.float32)
 
         """fuzzy parameters"""
-        self.fc = fuzzy_control(low_output=np.array([0., 0., 0., 0., 0., 0.]),
-                                high_output=np.array([0.03, 0.03, 0.004, 0.03, 0.03, 0.03]))
+        # self.fc = fuzzy_control(low_output=np.array([0., 0., 0., 0., 0., 0.]),
+        #                         high_output=np.array([0.03, 0.03, 0.004, 0.03, 0.03, 0.03]))
 
         
         '''vrep init session''' 
@@ -324,8 +329,8 @@ class ArmEnv(object):
         state = cp.deepcopy(current_state)
 
         """normalize the state"""
-        scale = self.state_high - self.state_low
-        final_state = (state - self.state_low) / scale
+        scale = 1
+        final_state = state / scale
 
         return final_state
 
@@ -335,6 +340,6 @@ if __name__ == '__main__':
     env = ArmEnv()
     while True:
         for i in range(30):
-            a = env.sample_action() * 100
-            s, r, done, safe = env.step(a)
+            a = env.sample_action()
+            env.step(a)
         env.reset()
