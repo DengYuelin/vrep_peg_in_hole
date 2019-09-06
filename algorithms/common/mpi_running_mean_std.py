@@ -1,6 +1,10 @@
 from mpi4py import MPI
+<<<<<<< HEAD
 import tensorflow as tf, baselines.common.tf_util as U, numpy as np
 
+=======
+import tensorflow as tf, algorithms.common.tf_util as U, numpy as np
+>>>>>>> 94d55945aa44e90ff2bb8446ffca9eb95c83c036
 
 class RunningMeanStd(object):
     # https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Parallel_algorithm

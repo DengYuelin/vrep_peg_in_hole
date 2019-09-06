@@ -125,4 +125,10 @@ def plot_comparision_curve_with_variance(result_paths, file_name='', render=Fals
         plt.show()
 
 
+<<<<<<< HEAD
 if __name__ == "__main__":
+=======
+# if __name__ == "__main__":
+#
+#
+>>>>>>> 94d55945aa44e90ff2bb8446ffca9eb95c83c036

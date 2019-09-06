@@ -5,9 +5,18 @@ from algorithms.ddpg.models import Actor, Critic
 from algorithms.ddpg.memory import Memory
 from algorithms.ddpg.noise import AdaptiveParamNoiseSpec, NormalActionNoise, OrnsteinUhlenbeckActionNoise
 
+<<<<<<< HEAD
 import algorithms.common.tf_util as U
 
 from algorithms import logger
+=======
+""" import your environment """
+from envs.vrepenv import ArmEnv
+
+import algorithms.common.tf_util as U
+
+from algorithms.common import logger
+>>>>>>> 94d55945aa44e90ff2bb8446ffca9eb95c83c036
 import numpy as np
 import copy as cp
 
@@ -33,14 +42,22 @@ def learn(network,
           popart=False,
           gamma=0.99,
           clip_norm=None,
+<<<<<<< HEAD
           nb_train_steps=50, # per epoch cycle and MPI worker,
           batch_size=32, # per MPI worker
+=======
+          nb_train_steps=50,  # per epoch cycle and MPI worker,
+          batch_size=32,  # per MPI worker
+>>>>>>> 94d55945aa44e90ff2bb8446ffca9eb95c83c036
           tau=0.01,
           param_noise_adaption_interval=50,
           **network_kwargs):
 
     nb_actions = env.action_space.shape[0]
+<<<<<<< HEAD
 
+=======
+>>>>>>> 94d55945aa44e90ff2bb8446ffca9eb95c83c036
     memory = Memory(limit=int(1e5), action_shape=env.action_space.shape[0], observation_shape=env.observation_space.shape)
 
     critic = Critic(network=network, **network_kwargs)
@@ -87,7 +104,10 @@ def learn(network,
     else:
         agent.initialize(sess)
         sess.graph.finalize()
+<<<<<<< HEAD
 
+=======
+>>>>>>> 94d55945aa44e90ff2bb8446ffca9eb95c83c036
     agent.reset()
 
     episodes = 0
@@ -119,22 +139,35 @@ def learn(network,
 
                 """ choose next action """
                 action, q, _, _ = agent.step(obs, stddev, apply_noise=True, compute_Q=True)
+<<<<<<< HEAD
                 print(action)
 
                 new_obs, r, done, safe_or_not = env.step(max_action * action, t_rollout)
+=======
+
+                new_obs, next_state, r, done, safe_or_not = env.step(max_action * action)
+>>>>>>> 94d55945aa44e90ff2bb8446ffca9eb95c83c036
 
                 if safe_or_not is False:
                     break
 
                 episode_reward += r
                 episode_step += 1
+<<<<<<< HEAD
                 episode_states.append([cp.deepcopy(state), cp.deepcopy(final_action), np.array(cp.deepcopy(r)), cp.deepcopy(next_state)])
+=======
+                episode_states.append([cp.deepcopy(state), cp.deepcopy(action), np.array(cp.deepcopy(r)), cp.deepcopy(next_state)])
+>>>>>>> 94d55945aa44e90ff2bb8446ffca9eb95c83c036
 
                 epoch_actions.append(action)
                 epoch_qs.append(q)
 
                 agent.store_transition(obs, action, r, new_obs, done)
                 obs = new_obs
+<<<<<<< HEAD
+=======
+                state = next_state
+>>>>>>> 94d55945aa44e90ff2bb8446ffca9eb95c83c036
 
                 if done:
                     break
@@ -165,6 +198,10 @@ def learn(network,
             epoch_adaptive_distances = []
             for t_train in range(nb_train_steps):
                 logger.info("")
+<<<<<<< HEAD
+=======
+                # Adapt param noise, if necessary.
+>>>>>>> 94d55945aa44e90ff2bb8446ffca9eb95c83c036
                 if memory.nb_entries >= batch_size and t_train % param_noise_adaption_interval == 0:
                     distance = agent.adapt_param_noise()
                     epoch_adaptive_distances.append(distance)
@@ -188,11 +225,19 @@ def learn(network,
 if __name__ == '__main__':
 
     """ import environment """
+<<<<<<< HEAD
     env = env_search_control(step_max=200, fuzzy=False, add_noise=False)
     algorithm_name = 'dyna_nn_ddpg'
     file_name = '_epochs_5_episodes_100_none_fuzzy'
     data_path = './prediction_data/'
     model_path = './prediction_model/'
+=======
+    env = ArmEnv()
+    algorithm_name = 'dyna_nn_ddpg'
+    data_path = './prediction_data/'
+    model_path = './prediction_model/'
+    file_name = '_epochs_5_episodes_100_none_fuzzy'
+>>>>>>> 94d55945aa44e90ff2bb8446ffca9eb95c83c036
     learn(network='mlp',
           env=env,
           data_path=data_path,

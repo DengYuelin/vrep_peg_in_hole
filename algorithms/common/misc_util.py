@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 import gym
+=======
+# import gym
+>>>>>>> 94d55945aa44e90ff2bb8446ffca9eb95c83c036
 import numpy as np
 import os
 import pickle

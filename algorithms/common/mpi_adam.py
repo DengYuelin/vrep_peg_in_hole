@@ -3,7 +3,10 @@ import algorithms.common.tf_util as U
 import tensorflow as tf
 import numpy as np
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 94d55945aa44e90ff2bb8446ffca9eb95c83c036
 class MpiAdam(object):
     def __init__(self, var_list, *, beta1=0.9, beta2=0.999, epsilon=1e-08, scale_grad_by_procs=True, comm=None):
         self.var_list = var_list

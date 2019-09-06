@@ -1,5 +1,9 @@
 import tensorflow as tf
+<<<<<<< HEAD
 from gym.spaces import Discrete, Box
+=======
+# from gym.spaces import Discrete, Box
+>>>>>>> 94d55945aa44e90ff2bb8446ffca9eb95c83c036
 
 def observation_placeholder(ob_space, batch_size=None, name='Ob'):
     '''

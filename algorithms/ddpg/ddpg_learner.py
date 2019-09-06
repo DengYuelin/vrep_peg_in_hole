@@ -3,6 +3,7 @@ from functools import reduce
 
 import numpy as np
 import tensorflow as tf
+<<<<<<< HEAD
 # import tensorflow.contrib as tc
 
 from algorithms import logger
@@ -10,6 +11,15 @@ from algorithms.common.mpi_adam import MpiAdam
 import algorithms.common.tf_util as U
 from algorithms.common.mpi_running_mean_std import RunningMeanStd
 # from mpi4py import MPI
+=======
+import tensorflow.contrib as tc
+
+from ..common import logger
+from ..common.mpi_adam import MpiAdam
+import algorithms.common.tf_util as U
+from ..common.mpi_running_mean_std import RunningMeanStd
+from mpi4py import MPI
+>>>>>>> 94d55945aa44e90ff2bb8446ffca9eb95c83c036
 
 
 def normalize(x, stats):
@@ -181,8 +191,13 @@ class DDPG(object):
         logger.info('  actor shapes: {}'.format(actor_shapes))
         logger.info('  actor params: {}'.format(actor_nb_params))
         self.actor_grads = U.flatgrad(self.actor_loss, self.actor.trainable_vars, clip_norm=self.clip_norm)
+<<<<<<< HEAD
         # self.actor_optimizer = MpiAdam(var_list=self.actor.trainable_vars,
         #     beta1=0.9, beta2=0.999, epsilon=1e-08)
+=======
+        self.actor_optimizer = MpiAdam(var_list=self.actor.trainable_vars,
+            beta1=0.9, beta2=0.999, epsilon=1e-08)
+>>>>>>> 94d55945aa44e90ff2bb8446ffca9eb95c83c036
 
     def setup_critic_optimizer(self):
         logger.info('setting up critic optimizer')
@@ -193,9 +208,14 @@ class DDPG(object):
             for var in critic_reg_vars:
                 logger.info('  regularizing: {}'.format(var.name))
             logger.info('  applying l2 regularization with {}'.format(self.critic_l2_reg))
+<<<<<<< HEAD
             critic_reg = tf.layers.apply_regularization(
                 tf.layers.l2_regularizer(self.critic_l2_reg),
                 # tc.layers.l2_regularizer(self.critic_l2_reg),
+=======
+            critic_reg = tc.layers.apply_regularization(
+                tc.layers.l2_regularizer(self.critic_l2_reg),
+>>>>>>> 94d55945aa44e90ff2bb8446ffca9eb95c83c036
                 weights_list=critic_reg_vars
             )
             self.critic_loss += critic_reg
@@ -204,8 +224,13 @@ class DDPG(object):
         logger.info('  critic shapes: {}'.format(critic_shapes))
         logger.info('  critic params: {}'.format(critic_nb_params))
         self.critic_grads = U.flatgrad(self.critic_loss, self.critic.trainable_vars, clip_norm=self.clip_norm)
+<<<<<<< HEAD
         # self.critic_optimizer = MpiAdam(var_list=self.critic.trainable_vars,
         #     beta1=0.9, beta2=0.999, epsilon=1e-08)
+=======
+        self.critic_optimizer = MpiAdam(var_list=self.critic.trainable_vars,
+            beta1=0.9, beta2=0.999, epsilon=1e-08)
+>>>>>>> 94d55945aa44e90ff2bb8446ffca9eb95c83c036
 
     def setup_popart(self):
         # See https://arxiv.org/pdf/1602.07714.pdf for details.

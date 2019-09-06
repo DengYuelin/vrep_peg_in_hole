@@ -18,9 +18,9 @@ def reword(s):
 # this function adjust the output of the network in to usable actions
 def actions(a, mode):  # here a ∈ action_bound
     if mode:
-        a_a = a * 0.001
+        a_a = a[0] * 0.001
     else:
-        a_a = a * 0.01
+        a_a = a[0] * 0.01
     return a_a
 
 
